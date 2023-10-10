@@ -1,0 +1,32 @@
+services:
+  api:
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    build:
+      context: .
+    command: ["yarn", "start"]
+    entrypoint: [ "/bin/bash", "./docker-entrypoint.sh" ]
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - MONGO_URL=mongodb://db:27017/adminDb
+      - MONGO_URL_SEED=mongodb://db:27017/test
+      - NODE_ENV=${NODE_ENV}
+    ports:
+      - 4001:4001
+    depends_on:
+      - db
+      - redis
+  db:
+    image: postgres:12.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
